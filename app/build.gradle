@@ -1,0 +1,109 @@
+//Can also use this syntax, but it requires figuring out how to use the android application syntax
+// this way too, and I haven't tried to do that yet
+//plugins {
+//	id "me.tatarka.retrolambda" version "3.2.0"
+//}
+apply plugin: 'android-sdk-manager'
+apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'com.trello.victor'
+apply plugin: 'kotlin-android'
+
+def cal = new GregorianCalendar()
+def versionYear = cal.get(Calendar.YEAR)
+def versionMonth = cal.get(Calendar.MONTH)
+def versionDay = cal.get(Calendar.DAY_OF_MONTH)
+def straightUpBuildNumber = project.hasProperty('ciBuildNum') ? ciBuildNum.toInteger : 1
+
+def calculateVersionCode = { ->
+	return straightUpBuildNumber * 100000000 + versionYear * 10000 + versionMonth * 100 + versionDay
+}
+
+def calculateVersionName = { ->
+	return "${straightUpBuildNumber}.${versionYear}.${versionMonth}.${versionDay}"
+}
+
+android {
+	compileSdkVersion 22
+	buildToolsVersion rootProject.ext.buildToolsVersion
+
+	compileOptions {
+		sourceCompatibility JavaVersion.VERSION_1_8
+		targetCompatibility JavaVersion.VERSION_1_8
+	}
+
+	defaultConfig {
+		applicationId "com.merrillogic.flow"
+		minSdkVersion 15
+		targetSdkVersion 22
+		versionCode calculateVersionCode()
+		versionName calculateVersionName()
+	}
+	buildTypes {
+		debug {
+			applicationIdSuffix ".debug"
+		}
+		alpha {
+			minifyEnabled true
+			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+			applicationIdSuffix ".alpha"
+			ext.betaDistributionReleaseNotesFilePath="ci/deploy/alpha_release_notes.txt"
+			ext.betaDistributionEmailsFilePath="ci/deploy/alpha_users.txt"
+		}
+		beta {
+			minifyEnabled true
+			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+			applicationIdSuffix ".beta"
+			ext.betaDistributionReleaseNotesFilePath="ci/deploy/beta_release_notes.txt"
+			ext.betaDistributionEmailsFilePath="ci/deploy/beta_users.txt"
+		}
+		release {
+			minifyEnabled true
+			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+		}
+	}
+
+	sourceSets {
+		main {
+			svg.srcDir 'src/main/svg'
+		}
+	}
+}
+
+victor {
+	// Any assets defined in relative terms needs a base DPI specified
+	svgDpi = 72
+
+	// Do not generate these densities for SVG assets
+	excludeDensities = [ 'ldpi', 'xxxhdpi' ]
+}
+
+dependencies {
+	compile fileTree(dir: 'libs', include: ['*.jar'])
+
+	//If this is a sample app for a library, include the library
+	// compile project(':lib')
+
+	//Kotlin
+	compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+	//Support libraries
+	compile "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
+	compile "com.android.support:support-annotations:${rootProject.ext.supportLibVersion}"
+//	compile "com.android.support:recyclerview-v7:${rootProject.ext.supportLibVersion}"
+
+	//Reactive
+	compile "io.reactivex:rxandroid:0.25.0"
+
+	//Network
+//	compile 'com.squareup.retrofit:retrofit:1.9.0'
+//	compile 'com.squareup.okhttp:okhttp:2.4.0'
+//	compile 'com.squareup.okhttp:okhttp-urlconnection:2.4.0'
+//	androidTestCompile 'com.squareup.okhttp:mockwebserver:2.4.0'
+
+	//View Injection
+//	compile 'com.jakewharton:butterknife:6.1.0'
+
+	//Testing
+	testCompile 'junit:junit:4.12'
+}

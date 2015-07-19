@@ -1,0 +1,24 @@
+buildscript {
+	ext.kotlin_version = '0.12.613'
+	repositories {
+		jcenter()
+	}
+	dependencies {
+		classpath 'com.android.tools.build:gradle:1.2.3'
+		classpath 'me.tatarka:gradle-retrolambda:2.5.0'
+		classpath 'com.trello:victor:0.1.4'
+		classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.0'
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+	}
+}
+
+ext.supportLibVersion = "22.2.1"
+ext.playServicesVersion = "7.5.0"
+ext.buildToolsVersion = "22.0.1"
+
+
+allprojects {
+	repositories {
+		jcenter()
+	}
+}
